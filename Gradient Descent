@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generating sample data
+X = np.array([1, 2, 3, 4, 5])  # Independent variable
+y = np.array([2.5, 2.2, 4.7, 3.4, 5.9])  # Dependent variable
+
+# Feature scaling (optional but can help with convergence)
+X = X.reshape(-1, 1)
+X = (X - np.mean(X)) / np.std(X)  # Normalize X
+
+# Adding the intercept term (x0 = 1 for all samples)
+X_b = np.c_[np.ones((X.shape[0], 1)), X]  # Add a column of ones to X for the intercept
+
+# Hyperparameters for Gradient Descent
+learning_rate = 0.1
+iterations = 1000
+m = len(X_b)
+
+# Initializing the parameters (theta)
+theta = np.random.randn(2)  # Random initialization of theta (intercept and slope)
+
+# Gradient Descent Algorithm
+for i in range(iterations):
+    # Compute the predictions
+    y_pred = X_b.dot(theta)
+    
+    # Compute the gradient (partial derivatives of the cost function with respect to theta)
+    gradients = 2/m * X_b.T.dot(y_pred - y)
+    
+    # Update the parameters (theta)
+    theta -= learning_rate * gradients
+    
+    # Print the cost every 100 iterations (optional, for tracking progress)
+    if i % 100 == 0:
+        cost = np.mean((y_pred - y) ** 2)  # Mean Squared Error cost function
+        print(f"Iteration {i}, Cost: {cost}")
+
+# Final parameters (intercept and slope)
+print("Final intercept (theta[0]):", theta[0])
+print("Final slope (theta[1]):", theta[1])
+
+# Visualize the result
+plt.scatter(X, y, color='blue', label='Data points')
+plt.plot(X, X_b.dot(theta), color='red', label='Gradient Descent Fit')
+plt.xlabel('X (Independent variable)')
+plt.ylabel('y (Dependent variable)')
+plt.legend()
+plt.show()
