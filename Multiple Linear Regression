@@ -1,0 +1,46 @@
+# Importing necessary libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+
+# Generating sample data (multiple independent variables)
+data = {
+    'X1': [1, 2, 3, 4, 5],
+    'X2': [2, 4, 1, 3, 7],
+    'Y':  [2, 2.5, 4.5, 3.5, 5.5]
+}
+
+# Converting to a DataFrame
+df = pd.DataFrame(data)
+
+# Defining the independent variables (X) and the dependent variable (y)
+X = df[['X1', 'X2']]  # Multiple features
+y = df['Y']           # Target variable
+
+# Splitting the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Creating and training the model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Making predictions
+y_pred = model.predict(X_test)
+
+# Printing the coefficients
+print("Intercept:", model.intercept_)
+print("Coefficients:", model.coef_)
+
+# Displaying the predictions
+print("Predicted values:", y_pred)
+print("Actual values:", y_test.values)
+
+# Visualizing (optional)
+plt.scatter(df['X1'], df['Y'], color='blue', label='X1 vs Y')
+plt.scatter(df['X2'], df['Y'], color='green', label='X2 vs Y')
+plt.xlabel("Independent Variables (X1 and X2)")
+plt.ylabel("Dependent Variable (Y)")
+plt.legend()
+plt.show()
