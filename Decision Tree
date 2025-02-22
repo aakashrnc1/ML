@@ -1,0 +1,61 @@
+import numpy as np
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+
+# Set random seed for reproducibility
+np.random.seed(42)
+
+# Create synthetic dataset
+data = {
+    "health_condition": np.random.choice(["good", "average", "poor"], 100),
+    "student_event": np.random.choice(["yes", "no"], 100),
+    "weather_condition": np.random.choice(["sunny", "rainy", "cloudy"], 100),
+    "evaluation_test": np.random.choice(["yes", "no"], 100),
+    "attendance_percentage": np.random.randint(0, 101, 100),  # Attendance percentage from 0 to 100
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+
+# Define attendance status based on multiple conditions
+def determine_attendance(row):
+    if row['attendance_percentage'] >= 75 and row['evaluation_test'] == "no" and row['health_condition'] == "poor" :
+        return "absent"
+    elif row['health_condition'] == "poor":
+        return "absent"
+    elif row['student_event'] == "yes":
+        return "absent"
+    elif row['weather_condition'] == "rainy" and row['evaluation_test'] == "no":
+        return "absent"
+    else:
+        return "present"
+
+# Apply the function to determine attendance status
+df['attendance_status'] = df.apply(determine_attendance, axis=1)
+
+# Encoding categorical features
+df_encoded = pd.get_dummies(df, drop_first=True)
+X = df_encoded.drop("attendance_status_present", axis=1)
+y = df_encoded["attendance_status_present"]
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train decision tree model
+clf_student = DecisionTreeClassifier(random_state=42)
+clf_student.fit(X_train, y_train)
+
+# Evaluate model
+predictions_student = clf_student.predict(X_test)
+print("Accuracy (Student Attendance):", accuracy_score(y_test, predictions_student))
+print("Classification Report (Student Attendance):")
+print(classification_report(y_test, predictions_student))
+
+# Visualize decision tree
+plt.figure(figsize=(15, 10))
+plot_tree(clf_student, feature_names=X.columns, class_names=["absent", "present"], filled=True)
+plt.title("Decision Tree for Student Attendance")
+plt.show()
