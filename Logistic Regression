@@ -1,24 +1,52 @@
-from sklearn.datasets import load_iris
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import numpy as np
 
-# Load the Iris dataset
-iris = load_iris()
-X, y = iris.data, iris.target
+# Load the dataset
+file_path = "SDN_Intrusion.csv"  # Replace with the correct path if necessary
+data = pd.read_csv(file_path)
 
-# Split the dataset into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+# Display basic information about the dataset
+print("Data Info:")
+print(data.info())
+print("\nFirst 5 Rows:")
+print(data.head())
 
-# Create a Logistic Regression classifier
-log_reg = LogisticRegression(max_iter=200)
+# Handle missing and infinite values
+# Replace infinite values with NaN
+data.replace([np.inf, -np.inf], np.nan, inplace=True)
 
-# Train the model
-log_reg.fit(X_train, y_train)
+# Drop rows with NaN values (or alternatively, you can use data.fillna())
+data.dropna(inplace=True)
 
-# Make predictions on the test set
-y_pred = log_reg.predict(X_test)
+# Define features (X) and target (y)
+# Replace 'target_column' with the actual target column name (e.g., 'Label')
+# Assuming the target column is named 'Label' and is the last column:
+X = data.iloc[:, :-1]  # All columns except the last one
+y = data.iloc[:, -1]   # Last column as target
 
-# Evaluate the classifier
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print("\nClassification Report:\n", classification_report(y_test, y_pred, target_names=iris.target_names))
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Feature scaling (recommended for logistic regression)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Initialize and train the Logistic Regression model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+print("\nModel Evaluation:")
+print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
