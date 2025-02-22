@@ -1,0 +1,40 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from google.colab import files
+
+# Step 1: Upload the Mall Customers Dataset
+uploaded = files.upload()
+df = pd.read_csv(list(uploaded.keys())[0])
+
+# Step 2: Select Relevant Features (Annual Income and Spending Score)
+X = df[['Annual Income (k$)', 'Spending Score (1-100)']]
+
+# Step 3: Scale the Features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Step 4: Apply K-Means Clustering with K=3 and max_iter=3
+kmeans = KMeans(n_clusters=3, max_iter=3, n_init=10, random_state=42)
+clusters = kmeans.fit_predict(X_scaled)
+
+# Add Cluster Labels to the Original Dataset
+df['Cluster'] = clusters
+
+# Step 5: Visualize the Clusters
+plt.figure(figsize=(8, 6))
+sns.scatterplot(x=X_scaled[:, 0], y=X_scaled[:, 1], hue=df['Cluster'], palette="viridis", s=100, alpha=0.6)
+plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], c='red', marker='X', s=200, label='Centroids')
+plt.xlabel("Annual Income (Scaled)")
+plt.ylabel("Spending Score (Scaled)")
+plt.title("Customer Segments using K-Means Clustering (K=3, 3 Iterations)")
+plt.legend()
+plt.show()
+
+# Step 6: Analyze the Clusters
+cluster_analysis = df.groupby('Cluster')[['Annual Income (k$)', 'Spending Score (1-100)']].mean()
+print("\nCluster Analysis:")
+print(cluster_analysis)
